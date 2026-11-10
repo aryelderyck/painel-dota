@@ -1,6 +1,6 @@
 # painel-dota: especificação de design
 
-Data: 2026-11-10 · Revisão 2 · Situação: **rascunho para revisão da pessoa** · Nível no kit `padroes-de-qualidade`: 2
+Data: 2026-11-10 · Revisão 3 · Situação: **rascunho para revisão da pessoa** · Nível no kit `padroes-de-qualidade`: 2
 
 ## 1. Entendimento
 
@@ -89,23 +89,48 @@ começa no dia da primeira coleta (dito com clareza na tela). Sem builds de habi
 builds de itens e deixa os de habilidades para depois, porque calcular a partir de partidas uma a uma não cabe nos limites
 gratuitos.
 
-Os limites que vi (2.000 chamadas por dia e 60 por minuto para a OpenDota, num SDK de terceiros; 2.000 por hora para o
-STRATZ, em artigo de 2021) **não estão confirmados**. A documentação oficial não abre nas ferramentas desta sessão (E-017).
-Se algo contradisser esta especificação, ela é corrigida antes de qualquer código.
+**Limites (nova tentativa em 2026-11-10):** duas páginas de terceiros, independentes, citam para a OpenDota cerca de
+**2.000 chamadas por dia e 60 por minuto** sem chave; para o STRATZ, um artigo de 2021 cita 2.000 por hora no token padrão.
+**Nenhum número foi confirmado em fonte oficial:** a página de chaves e a documentação da OpenDota dependem de JavaScript e
+não abrem nas ferramentas desta sessão, e a chamada direta à API é bloqueada pelo ambiente (E-017). O projeto é desenhado
+para caber em 2.000 por dia; a Etapa 0 confirma lendo os cabeçalhos de limite de uma resposta real. Se algo contradisser
+esta especificação, ela é corrigida antes de qualquer código.
+
+### 4.1 Como caber no limite de requisições
+
+Orçamento diário dividido e contado em um só lugar (`orcamento.py`), não só por IP:
+
+| Uso | Parte do orçamento | Como economiza |
+| --- | --- | --- |
+| Coletor (versões, meta, builds) | Reserva fixa, com prioridade | Checar versão nova custa 1 chamada a cada 6 horas; a coleta completa roda 1 vez por dia e logo após uma versão nova; usa rotas agregadas (uma chamada traz todos os heróis) sempre que existirem |
+| Busca de jogadores | O restante | Ver abaixo |
+
+- **Cache sob demanda com validade em camadas:** dados de herói e de versão valem até a próxima coleta; perfil de jogador vale
+  6 horas. Jogadores muito procurados ficam naturalmente em cache, sem lista de "mais buscados" (que seria perfil de pessoas).
+- **Mostrar o que já temos e atualizar depois** (stale-while-revalidate): se há dado guardado, a tela abre com ele, com
+  "atualizado há X horas", e a atualização acontece em segundo plano se houver orçamento.
+- **Busca incremental:** para um jogador já conhecido, pedir só as partidas mais novas que a última guardada.
+- **Pedidos iguais ao mesmo tempo viram um só:** duas pessoas buscando o mesmo ID geram uma chamada à fonte.
+- **Orçamento esgotado não derruba o site:** resposta com o dado guardado, ou aviso claro de "tente mais tarde" (HTTP 429 com
+  `Retry-After`); as páginas públicas são estáticas e continuam no ar. Resposta 429 da fonte gera espera crescente.
+- **Chave gratuita da fonte**, se a Etapa 0 mostrar que existe e que aumenta o limite sem custo.
 
 ## 5. Arquitetura (híbrida, aprovada)
 
-- **Coletor agendado** (`coletor/`): roda no CI em horário fixo (a cada 6 horas, ajustável). Pergunta à fonte qual é a versão
-  mais recente; se for nova, cria o registro dela e passa a guardar retratos das estatísticas **por versão**. Também atualiza
-  heróis, meta e builds. É isso que faz o site seguir o jogo sozinho.
-- **Registro de versões** (tabela `versao`): identificador (como `7.41f`), data de lançamento, se é a atual.
-- **Gerador do site estático** (`site/`, Python com Jinja2): lê o banco e produz HTML pronto para cada idioma e cada versão.
-  Publicado de graça no GitHub Pages depois de cada coleta.
+- **Coletor agendado** (`coletor/`): roda no GitHub Actions. A cada 6 horas pergunta à fonte qual é a versão mais recente
+  (1 chamada); uma vez por dia, e logo após detectar versão nova, coleta meta e builds. É isso que faz o site seguir o jogo sozinho.
+- **Dados públicos em arquivos** (`dados/<versão>/*.json`, em um ramo `dados` do repositório): o CI não tem banco que
+  sobreviva entre execuções, então os retratos por versão são gravados como JSON e versionados pelo próprio git. Isso dá
+  histórico gratuito e auditável, e nenhum dado pessoal entra ali (só agregados de heróis).
+- **Registro de versões** (`dados/versoes.json`): identificador (como `7.41f`), data de lançamento, qual é a atual.
+- **Gerador do site estático** (`site/`, Python com Jinja2): lê os arquivos de `dados/` e produz HTML pronto para cada idioma
+  e cada versão. Publicado de graça no GitHub Pages depois de cada coleta.
 - **API própria** (`api/`, FastAPI): busca jogador, calcula diagnóstico, rota `/saude`, rota de exclusão (seção 8).
 - **Cliente da fonte** (`api/fonte/`): implementa `FonteDeDados` com `httpx`, com tempo limite, nova tentativa com espera,
   respeito aos limites e tratamento de resposta inesperada.
-- **Banco** (SQLAlchemy 2 e Alembic): SQLite no início, PostgreSQL depois. Guarda versões, estatísticas por versão, builds,
-  cache de jogadores.
+- **Banco da API** (SQLAlchemy 2 e Alembic): SQLite no desenvolvimento, PostgreSQL na publicação. Guarda só o que é da busca
+  de jogador: cache, contador de orçamento e lista de bloqueio. A lista de bloqueio **precisa sobreviver a reinícios**; por
+  isso a publicação exige um banco gratuito persistente (disco temporário não serve).
 - **Diagnóstico** (`api/diagnostico/`): funções puras que recebem estatísticas e devolvem identificadores de achados
   (sem texto). O texto vem do arquivo de tradução. Regras determinísticas e testáveis; amostra pequena (menos de 20 partidas)
   gera aviso em vez de conclusão.
@@ -121,25 +146,35 @@ grava, calcula o diagnóstico e responde. Páginas de jogador usam `noindex`.
   endereço permanente de cada versão. Enquanto a versão é a atual, a página dela aponta a canônica para o endereço "atual";
   quando sai uma versão nova, ela passa a ser a própria canônica. Seletor de versão feito de links comuns.
 - Só a versão atual e a anterior entram no `sitemap.xml`; as mais antigas ficam acessíveis com `noindex,follow` (ajustável).
-- Cada página: `hreflang` recíproco com endereços completos e `x-default`, `<html lang>`, `robots.txt`, canônica,
+- Cada página: `hreflang` recíproco com endereços completos e `x-default`, `<html lang>`, meta `robots`, canônica,
   `<title>` e descrição próprios, JSON-LD só do que a página mostra, links internos descritivos e migalhas de pão.
 - Textos só em arquivos de tradução; o build **falha** se faltar chave em algum idioma. Fontes próprias com subconjunto
   (sem Google Fonts). Números e datas com `Intl`.
 - Metas: Lighthouse 95 ou mais em todas as categorias, LCP até 2,5 s, INP até 200 ms, CLS até 0,1 (`PADROES.md`, seção 9A).
 - Testes automáticos de `hreflang` recíproco, links sem 404, um `<h1>` por página, canônica correta nas páginas de versão e
   `noindex` nas páginas de jogador.
+- **Limitação do endereço gratuito:** o site fica em `aryelderyck.github.io/painel-dota/`. Um `robots.txt` só vale na raiz
+  do domínio, que pertence a outro repositório; por isso o controle de indexação é feito por meta `robots` em cada página,
+  e o `sitemap.xml` (que pode ficar na subpasta) é enviado pelo Google Search Console. Domínio próprio custa dinheiro e
+  fica fora do orçamento; a `SITE_URL` fica em um só lugar para a troca ser simples se um dia houver domínio.
+- O Google indexa a **versão para celular** das páginas; todo conteúdo que existe no PC existe também no celular.
 - Não confirmado: de onde virão os nomes de heróis traduzidos (fase dos demais idiomas).
 
 ## 7. Direção visual
 
-Identidade própria, feita para telas pequenas primeiro, sem copiar o layout, as cores, os nomes de métricas nem a marca de
+Identidade própria. **O desenho começa pelo PC** (tabelas largas, comparação lado a lado, base em 1440 px), que é onde o
+jogador de Dota está, e a **responsividade é obrigatória**: toda página funciona em 390 px sem rolagem horizontal da página,
+com o mesmo conteúdo (tabelas viram cartões ou ganham rolagem própria). Capturas em 1440 px e 390 px em toda etapa visual.
+Sem copiar o layout, as cores, os nomes de métricas nem a marca de
 nenhum dos sites de referência. A direção (paleta, tipografia, componentes de tabela e gráfico, tema escuro e claro, contraste
 mínimo de 4,5:1) é definida com **maquetes** no início da etapa do site, antes de qualquer página; a pessoa escolhe entre
 opções. Os gráficos são desenhados por nós, sem biblioteca de terceiros carregada de fora.
 
 ## 8. Privacidade e segurança
 
-- Só dados públicos de partidas; guardamos o mínimo e por no máximo **90 dias**.
+- Só dados públicos de partidas; guardamos o mínimo e por no máximo **90 dias**. A fase 2 (evolução ao longo do tempo)
+  terá de rever esse prazo ou recalcular a evolução a cada busca; a decisão fica para a especificação daquela fase.
+- O IP usado no limite de requisições fica só em memória, pelo tempo da janela, e não vai para o banco nem para os logs.
 - `DELETE` do jogador apaga o que está guardado e impede nova coleta. A lista de bloqueio guarda só um **hash com segredo
   do servidor** do ID, nunca o ID.
 - Limite de requisições por IP (valor inicial 30 por minuto, ajustável), CORS permitindo só o endereço do site,
@@ -153,14 +188,17 @@ opções. Os gráficos são desenhados por nós, sem biblioteca de terceiros car
 - `pytest` com `respx`: **nenhum teste acessa a internet**; respostas gravadas ficam em fixtures com dados fictícios.
 - Teste de contrato para a fonte: uma checagem ocasional contra a API real, fora do CI padrão, avisa se o formato mudou.
 - Teste da troca de versão: com fixtures de duas versões, o coletor cria a nova, o gerador aponta "atual" para ela e a anterior continua navegável.
+- Teste do orçamento: com o contador no limite, a API responde com o dado guardado ou com 429, e nunca chama a fonte.
 - Testes de mutação à mão em cada regra do diagnóstico (kit, E-009 e E-010).
 - CI no GitHub Actions: `ruff`, `pytest`, build do site, Lighthouse CI, CodeQL e Dependabot (modelos em `padroes-de-qualidade/templates`).
 - A Definição de Pronto do nível 2 do kit (`PADROES.md`, seção 2) vale integralmente.
 
 ## 10. Hospedagem gratuita
 
-- Site estático: GitHub Pages (decidido). O coletor roda como tarefa agendada do GitHub Actions (gratuito em repositório público).
-- API: precisa de uma hospedagem gratuita que aceite Docker ou Python; essas hospedagens costumam "dormir" e a primeira
+- Site estático: GitHub Pages (decidido). O coletor roda como tarefa agendada do GitHub Actions (gratuito em repositório
+  público). Tarefas agendadas podem atrasar e o GitHub costuma suspendê-las em repositórios sem atividade por longos
+  períodos (a confirmar na etapa de publicação); o site mostra a data da última coleta para o atraso ficar visível.
+- API: precisa de uma hospedagem gratuita que aceite Docker ou Python, mais um PostgreSQL gratuito persistente; essas hospedagens costumam "dormir" e a primeira
   consulta demora. A escolha é feita na etapa de publicação, depois de conferir as condições do momento, e a tela mostra
   um estado de carregamento. **Risco:** se nenhuma opção gratuita servir, a versão 1 publica as páginas públicas e roda a
   busca de jogador em Docker local, e o fato é dito com clareza no README.
@@ -175,7 +213,7 @@ opções. Os gráficos são desenhados por nós, sem biblioteca de terceiros car
 ## 12. Etapas (o plano detalha)
 
 0. Verificar as APIs na máquina da pessoa e decidir a fonte (`docs/api-fontes.md`). 1. Esqueleto, CI e `/saude`.
-2. Cliente da fonte com fixtures. 3. Banco, versões e cache. 4. Coletor agendado e troca de versão. 5. Direção visual com maquetes.
+2. Cliente da fonte com fixtures. 3. Coletor agendado, arquivos de dados por versão e troca de versão. 4. Banco da API, cache e orçamento de requisições. 5. Direção visual com maquetes.
 6. Gerador do site: meta por versão e página do herói com builds, idiomas e SEO. 7. API do jogador, diagnóstico e front-end da busca.
 8. LGPD e segurança (exclusão, limites, CORS). 9. Publicação, Lighthouse CI e medição em campo. Cada etapa termina com algo publicável.
 
@@ -185,6 +223,8 @@ opções. Os gráficos são desenhados por nós, sem biblioteca de terceiros car
 | --- | --- |
 | Limites ou regras da fonte diferentes do esperado | Etapa 0, cache no banco, interface `FonteDeDados` |
 | A fonte não entrega estatísticas por versão ou builds de habilidades | Retratos periódicos; builds de habilidades adiados (seção 4) |
+| Limite diário esgotado | Orçamento com reserva para o coletor, cache em camadas, resposta com dado guardado (seção 4.1) |
+| Coletor parado sem ninguém notar | Data da última coleta visível no site; falha do coletor quebra o workflow e gera aviso |
 | Escopo grande para quem está aprendendo | Versão 1 em fatias publicáveis; o resto em fases (seção 2) |
 | API gratuita sem hospedagem adequada | Seção 10 |
 | Poucos jogadores com dados públicos ativados | Mensagem clara; páginas de heróis e meta continuam úteis sem jogador |
