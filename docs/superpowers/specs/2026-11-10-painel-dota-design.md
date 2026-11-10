@@ -1,6 +1,6 @@
 # painel-dota: especificação de design
 
-Data: 2026-11-10 · Revisão 3 · Situação: **rascunho para revisão da pessoa** · Nível no kit `padroes-de-qualidade`: 2
+Data: 2026-11-10 · Revisão 4 · Situação: **aprovada pela pessoa em 2026-11-10** (revisão 4 acrescenta a seção 7A) · Nível no kit `padroes-de-qualidade`: 2
 
 ## 1. Entendimento
 
@@ -43,7 +43,7 @@ estatísticas por faixa de rank, ranking, busca de vários jogadores, notas de v
 | **4** | Comparar dois jogadores e dois heróis. Builds fora do meta. |
 | **5** | Demais idiomas (ru, es, zh-Hans, id, uk), cada um só com tradução revisada. Partidas profissionais e torneios, se a fonte permitir. Nota própria dos heróis, com fórmula pública (não copiar a de outro site). |
 
-**Fora de escopo:** contas e login, pagamento, anúncios, comentários, busca por apelido (expõe dado pessoal), transmissões
+**Fora de escopo da versão 1:** anúncios (preparados desde já, seção 7A). **Fora de escopo:** contas e login, pagamento, comentários, busca por apelido (expõe dado pessoal), transmissões
 ao vivo e vídeos incorporados (recursos de terceiros; só links para fora), acompanhamento de partida ao vivo.
 
 **Diferencial:** o Dota2ProTracker, segundo a página inicial, usa partidas de MMR 7000 ou mais e profissionais. Se a fonte
@@ -169,6 +169,21 @@ Sem copiar o layout, as cores, os nomes de métricas nem a marca de
 nenhum dos sites de referência. A direção (paleta, tipografia, componentes de tabela e gráfico, tema escuro e claro, contraste
 mínimo de 4,5:1) é definida com **maquetes** no início da etapa do site, antes de qualquer página; a pessoa escolhe entre
 opções. Os gráficos são desenhados por nós, sem biblioteca de terceiros carregada de fora.
+
+## 7A. Preparação para anúncios (decisão de 2026-11-10)
+
+A versão 1 vai ao ar **sem anúncios**, mas o site é desenhado para recebê-los depois sem refazer o layout:
+
+- **Espaços reservados** nas maquetes e no HTML (componente `espaco-anuncio`, com largura e altura fixas, vazio e oculto na
+  versão 1), para que a entrada dos anúncios não cause saltos de layout (CLS). Posições: topo e lateral no PC, entre blocos no celular.
+- **CSP e lista de origens em um só arquivo de configuração**, para liberar os domínios da rede de anúncios em um único lugar.
+- **`SITE_URL` em um só lugar** e nenhum caminho preso ao GitHub Pages, porque a monetização exige mudar de hospedagem e ter
+  domínio próprio (o arquivo `ads.txt` precisa ficar na raiz do domínio).
+- **Fase de monetização** (depois da versão 1) só começa com três condições: regras da fonte de dados permitem uso com
+  anúncios (verificado na Etapa 0, não presumido), domínio próprio, e tráfego real.
+- **Consentimento:** a pessoa prefere não tratar de LGPD nos anúncios. Recomendação registrada: manter um aviso de
+  consentimento simples, porque o site mira jogadores da Europa e as redes de anúncios costumam exigi-lo para aprovar e
+  manter a conta. A decisão final é tomada na especificação da fase de monetização, com as regras da rede escolhida em mãos.
 
 ## 8. Privacidade e segurança
 
