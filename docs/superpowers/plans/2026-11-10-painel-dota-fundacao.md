@@ -18,6 +18,7 @@
 - Nenhum recurso de terceiros no navegador. Segredos só em `.env` (ignorado pelo git) e `.env.example` sem valores.
 - TDD: teste antes, ver falhar pelo motivo certo, depois o código. Antes de afirmar que funciona, rodar e ler a saída.
 - Kit `padroes-de-qualidade` versão 0.4, nível 2. Erro novo vira entrada no `ERROS.md` do kit no mesmo dia.
+- Inglês junto com o código: termo técnico em inglês com tradução na primeira vez; diante de erro ou tela em inglês, a pessoa diz primeiro o que entendeu; `/fechar-tarefa` registra de 3 a 5 termos novos em `APRENDIZADOS.md`.
 - Tarefa marcada **(solo)** é escrita pela pessoa: Claude Code não entrega a solução, só a ficha, os testes e dicas em escada.
 
 ## Review Focus
@@ -104,7 +105,7 @@ def test_saude_responde_ok_e_so_o_status():
 
 - [ ] **Step 1:** `docs/tarefas/MODELO.md` com as seções: O que você vai construir · Conceitos (do básico ao avançado, cada um com exemplo mínimo que **não** é a solução) · Passo a passo sem código · Como saber que ficou certo (comando e saída esperada) · Escada de dicas (3 níveis, fechados em `<details>`) · Perguntas de explicar de volta (2).
 - [ ] **Step 2:** `CLAUDE.md`: regra "em tarefa (solo), não escreva a solução; ofereça a próxima dica da escada só quando a pessoa pedir" e regra "ao fim de cada tarefa, rode `/fechar-tarefa`".
-- [ ] **Step 3:** skill `/fechar-tarefa`: roda testes e ruff, faz as 2 perguntas da ficha, grava em `APRENDIZADOS.md` a data, a tarefa, o erro cometido e as respostas da pessoa **sem editar**.
+- [ ] **Step 3:** skill `/fechar-tarefa`: roda testes e ruff, faz as 2 perguntas da ficha, grava em `APRENDIZADOS.md` a data, a tarefa, o erro cometido, as respostas da pessoa **sem editar** e de 3 a 5 termos novos em inglês com a tradução.
 - [ ] **Step 4:** gancho `Stop` que lembra de rodar `/fechar-tarefa` se houver commit novo sem entrada correspondente em `APRENDIZADOS.md`.
 - [ ] **Step 5:** `.vscode/extensions.json` recomendando as extensões de Python e Ruff; `.vscode/settings.json` com formatar ao salvar pelo Ruff e pytest como executor de testes.
 - [ ] **Step 6:** verificação na máquina da pessoa: abrir o projeto no VS Code, rodar um teste pela interface; no Claude Code, rodar `/fechar-tarefa` uma vez de ensaio e conferir a entrada gerada. O gancho nunca foi executado: se falhar, registrar no `ERROS.md` do kit e corrigir antes de seguir.
