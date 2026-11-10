@@ -96,6 +96,13 @@ não abrem nas ferramentas desta sessão, e a chamada direta à API é bloqueada
 para caber em 2.000 por dia; a Etapa 0 confirma lendo os cabeçalhos de limite de uma resposta real. Se algo contradisser
 esta especificação, ela é corrigida antes de qualquer código.
 
+**Primeira evidência real (2026-11-10, chamada da máquina da pessoa a `/api/constants/patch`, sem chave):** a resposta traz os
+cabeçalhos `X-Rate-Limit-Remaining-Minute: 57` e `X-Rate-Limit-Remaining-Day: 2988`. Isso é compatível com 60 por minuto e
+sugere um teto diário perto de **3.000** (maior que os 2.000 citados por terceiros); o teto exato ainda precisa da página
+oficial. O limite é contado **por IP**, então em rede compartilhada outras pessoas consomem o mesmo saldo. A lista de versões
+tem 61 itens e termina em `7.41` (2026-03-24): **só versões principais, sem as letras** (7.41d, 7.41f). Consequência: a
+navegação da versão 1 é por versão principal; as letras entram apenas se a tarefa 1 do plano achar uma fonte para elas.
+
 ### 4.1 Como caber no limite de requisições
 
 Orçamento diário dividido e contado em um só lugar (`orcamento.py`), não só por IP:
