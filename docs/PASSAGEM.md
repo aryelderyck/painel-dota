@@ -10,7 +10,10 @@ para o outro computador. Atualize-o a cada passagem; apague-o quando o plano 1 t
 1. Na mesma pasta, clone os dois repositórios da sua conta, lado a lado: `painel-dota` e `padroes-de-qualidade`
    (o plano usa o caminho `../padroes-de-qualidade`).
 2. No `painel-dota`: `git switch plano-1-fundacao` e `git status -sb` (precisa estar em dia; E-020 do kit).
-3. No Claude Code, aberto na pasta `painel-dota`: "Leia `docs/PASSAGEM.md` e continue a tarefa 1 do plano 1, com as
+3. **Antes do primeiro commit, nos dois repositórios**, configure a identidade só neles (ela fica em `.git/config` e não
+   vem com o clone; E-035 do kit): `git config --local user.name` e `git config --local user.email` com o mesmo nome e o
+   mesmo e-mail `noreply` do GitHub que aparecem em `git log -1 --format='%an <%ae>'`. Confira com `git config user.email`.
+4. No Claude Code, aberto na pasta `painel-dota`: "Leia `docs/PASSAGEM.md` e continue a tarefa 1 do plano 1, com as
    mesmas regras de trabalho: uma tarefa por vez, explicar antes, TDD, nada sem verificar, erros no `ERROS.md` do kit."
 
 ## O que está feito
@@ -35,7 +38,10 @@ atualizado no mesmo commit; temporários com uma linha); `.gitattributes` no kit
 **Decisões do Claude Code, para conferir:** trabalhar no ramo `plano-1-fundacao` em vez da `main` (o kit pede ramos
 curtos); `.gitignore` criado já na tarefa 1, só com `ferramentas/etapa0/saida/` (a tarefa 2 acrescenta o resto).
 
-**Kit `padroes-de-qualidade`:** erros E-025 a E-034, regras 17 e 18, `.gitattributes`, `docs/MAPA-DE-ARQUIVOS.md` e a
+**Identidade dos commits:** nome da conta do GitHub e e-mail `noreply`, configurados só nestes dois repositórios; os commits
+da sessão foram refeitos com ela antes do primeiro envio (E-035 do kit).
+
+**Kit `padroes-de-qualidade`:** erros E-025 a E-035, regras 17 e 18, `.gitattributes`, `docs/MAPA-DE-ARQUIVOS.md` e a
 regra nova em `PRATICAS.md` como "Em teste (painel)".
 
 ## O que falta na tarefa 1
