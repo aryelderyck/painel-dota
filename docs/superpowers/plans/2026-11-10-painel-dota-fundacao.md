@@ -20,6 +20,7 @@
 - Kit `padroes-de-qualidade` versão 0.4, nível 2. Erro novo vira entrada no `ERROS.md` do kit no mesmo dia.
 - Inglês junto com o código: termo técnico em inglês com tradução na primeira vez; diante de erro ou tela em inglês, a pessoa diz primeiro o que entendeu; `/fechar-tarefa` registra de 3 a 5 termos novos em `APRENDIZADOS.md`.
 - Tarefa marcada **(solo)** é escrita pela pessoa: Claude Code não entrega a solução, só a ficha, os testes e dicas em escada.
+- **Cada arquivo com o seu porquê:** antes de criar qualquer arquivo (inclusive de configuração), Claude Code explica em poucas linhas para que serve, por que fica naquela pasta e com aquele nome, quais alternativas existiam e por que não foram escolhidas. Cada arquivo do repositório tem uma linha em `docs/MAPA-DE-ARQUIVOS.md` (`arquivo | para que serve | por que está aqui | alternativas | tarefa em que foi criado`), atualizada no mesmo commit que cria, move ou apaga o arquivo (aprovado pela pessoa). Arquivo que não se consegue justificar não é criado, e a pessoa é avisada. Vale por inteiro para arquivos do repositório; arquivo temporário, fora dele, ganha só uma linha dizendo para que serve.
 
 ## Review Focus
 
@@ -34,23 +35,24 @@
 ### Task 1: Etapa 0, verificar as fontes de dados
 
 **Files:**
-- Create: `docs/api-fontes.md`
+- Create: `docs/api-fontes.md`, `docs/MAPA-DE-ARQUIVOS.md` (com os arquivos que já existem), `ferramentas/etapa0/campos-jogador.ps1` e `ferramentas/etapa0/stratz-esquema.ps1` (scripts de verificação, pedidos pela pessoa para continuar em outro computador), `.gitignore` (só `ferramentas/etapa0/saida/`), `docs/PASSAGEM.md` (estado para retomar em outra máquina)
 - Modify: `docs/superpowers/specs/2026-11-10-painel-dota-design.md` (seção 4, com a decisão)
 
 **Interfaces:**
 - Produces: a decisão "fonte única X" ou "X para jogador e Y para meta", que o plano 2 usa para desenhar `FonteDeDados`.
 
-- [ ] **Step 1:** rodar `curl.exe -i https://api.opendota.com/api/constants/patch` e anotar: código de status, cabeçalhos de limite (qualquer um com `rate` ou `limit` no nome) e se a lista traz versões com letra.
-- [ ] **Step 2:** abrir no navegador a documentação da OpenDota (`docs.opendota.com`) e a página de chaves (`www.opendota.com/api-keys`); anotar limites gratuitos, preço, regras de uso, atribuição e se uso com anúncios é permitido. Repetir para o STRATZ (`stratz.com/api`).
+- [x] **Step 1:** rodar `curl.exe -i https://api.opendota.com/api/constants/patch` e anotar: código de status, cabeçalhos de limite (qualquer um com `rate` ou `limit` no nome) e se a lista traz versões com letra.
+- [x] **Step 2:** abrir no navegador a documentação da OpenDota (`docs.opendota.com`) e a página de chaves (`www.opendota.com/api-keys`); anotar limites gratuitos, preço, regras de uso, atribuição e se uso com anúncios é permitido. Repetir para o STRATZ (`stratz.com/api`).
 - [ ] **Step 3:** preencher em `docs/api-fontes.md` a tabela das 5 funções da seção 4 da especificação, uma linha por função e por fonte, com as colunas `função | fonte | sim, não ou parcial | chamada que prova | observação`. Para a linha de jogador, usar o próprio ID só no terminal e registrar apenas os **nomes dos campos** devolvidos, nunca o ID nem valores.
 - [ ] **Step 4:** aplicar a regra de decisão (uma fonte, se cobrir a fase 1) e escrever a decisão e as consequências na seção 4 da especificação.
-- [ ] **Step 5:** verificação: `docs/api-fontes.md` não tem linha em branco na coluna de resultado, e `git grep -nE "[0-9]{8,}" docs/api-fontes.md` não devolve nenhum ID de conta.
+- [ ] **Step 5:** verificação: `docs/api-fontes.md` não tem linha em branco na coluna de resultado, e `git grep --untracked -nE "[0-9]{8,}" docs/api-fontes.md` não devolve nenhum ID de conta (sem `--untracked`, o `git grep` ignora arquivo novo e a verificação passa sem olhar; E-025 do kit). Antes, rodar o mesmo comando num arquivo de teste com um número fictício de 9 dígitos e ver que ele é encontrado.
 - [ ] **Step 6:** commit `docs: registra a verificação das fontes de dados e a decisão`.
 
 ### Task 2: esqueleto do projeto e CI
 
 **Files:**
-- Create: `pyproject.toml` (a partir de `padroes-de-qualidade/templates/pyproject-python.toml`), `.gitignore`, `.gitattributes`, `.env.example`, `api/__init__.py`, `tests/__init__.py`, `tests/test_sem_rede.py`, `.github/workflows/ci.yml` (a partir de `templates/github/ci-python.yml`), `.github/dependabot.yml`, `.github/workflows/codeql.yml`, `CLAUDE.md` (a partir de `templates/CLAUDE.template.md`), `APRENDIZADOS.md`
+- Modify: `.gitignore` (criado na tarefa 1)
+- Create: `pyproject.toml` (a partir de `padroes-de-qualidade/templates/pyproject-python.toml`), `.gitattributes`, `.env.example`, `api/__init__.py`, `tests/__init__.py`, `tests/test_sem_rede.py`, `.github/workflows/ci.yml` (a partir de `templates/github/ci-python.yml`), `.github/dependabot.yml`, `.github/workflows/codeql.yml`, `CLAUDE.md` (a partir de `templates/CLAUDE.template.md`), `APRENDIZADOS.md`
 
 - [ ] **Step 1:** escrever o teste que prova o bloqueio de rede:
 
@@ -66,7 +68,7 @@ def test_rede_bloqueada_nos_testes():
 
 - [ ] **Step 2:** rodar `pytest tests/test_sem_rede.py -v`. Esperado: FALHA (sem `--disable-socket` configurado, o socket abre).
 - [ ] **Step 3:** em `pyproject.toml`, dependências `fastapi`, `pydantic`, `uvicorn`; de desenvolvimento `pytest`, `pytest-socket`, `httpx`, `ruff`; `addopts = "--disable-socket"` na configuração do pytest; Python `>=3.12`.
-- [ ] **Step 4:** `.gitattributes` com `* text=auto eol=lf`; `.gitignore` com `.env`, `.venv/`, `__pycache__/`, `*.db`.
+- [ ] **Step 4:** `.gitattributes` com `* text=auto eol=lf`; acrescentar ao `.gitignore` (que já tem `ferramentas/etapa0/saida/`) as linhas `.env`, `.venv/`, `__pycache__/`, `*.db`, `.playwright-mcp/` (capturas do navegador automático usado na tarefa 1). Depois do commit do `.gitattributes`, com a pasta limpa, apagar e restaurar os arquivos rastreados (`git ls-files -z | xargs -0 rm -f && git checkout -- .`) e conferir com `git ls-files --eol` (E-031 do kit: `git checkout-index -f -a` não basta).
 - [ ] **Step 5:** rodar `pytest -v` e `ruff check .`. Esperado: 1 teste passa, ruff sem erros.
 - [ ] **Step 6:** enviar e conferir o workflow `ci` verde na aba Actions. Commit `chore: cria o esqueleto do projeto com CI e bloqueio de rede nos testes`.
 
@@ -104,8 +106,8 @@ def test_saude_responde_ok_e_so_o_status():
 - Modify: `CLAUDE.md`
 
 - [ ] **Step 1:** `docs/tarefas/MODELO.md` com as seções: O que você vai construir · Conceitos (do básico ao avançado, cada um com exemplo mínimo que **não** é a solução) · Passo a passo sem código · Como saber que ficou certo (comando e saída esperada) · Escada de dicas (3 níveis, fechados em `<details>`) · Perguntas de explicar de volta (2).
-- [ ] **Step 2:** `CLAUDE.md`: regra "em tarefa (solo), não escreva a solução; ofereça a próxima dica da escada só quando a pessoa pedir" e regra "ao fim de cada tarefa, rode `/fechar-tarefa`".
-- [ ] **Step 3:** skill `/fechar-tarefa`: roda testes e ruff, faz as 2 perguntas da ficha, grava em `APRENDIZADOS.md` a data, a tarefa, o erro cometido, as respostas da pessoa **sem editar** e de 3 a 5 termos novos em inglês com a tradução.
+- [ ] **Step 2:** `CLAUDE.md`: regra "em tarefa (solo), não escreva a solução; ofereça a próxima dica da escada só quando a pessoa pedir", regra "ao fim de cada tarefa, rode `/fechar-tarefa`" e regra "cada arquivo com o seu porquê" (das Global Constraints: explicar antes de criar, manter `docs/MAPA-DE-ARQUIVOS.md`, não criar o que não se justifica).
+- [ ] **Step 3:** skill `/fechar-tarefa`: roda testes e ruff, faz as 2 perguntas da ficha (uma delas pode ser sobre um arquivo criado na tarefa, a partir da linha dele em `docs/MAPA-DE-ARQUIVOS.md`), grava em `APRENDIZADOS.md` a data, a tarefa, o erro cometido, as respostas da pessoa **sem editar** e de 3 a 5 termos novos em inglês com a tradução.
 - [ ] **Step 4:** gancho `Stop` que lembra de rodar `/fechar-tarefa` se houver commit novo sem entrada correspondente em `APRENDIZADOS.md`.
 - [ ] **Step 5:** `.vscode/extensions.json` recomendando as extensões de Python e Ruff; `.vscode/settings.json` com formatar ao salvar pelo Ruff e pytest como executor de testes.
 - [ ] **Step 6:** verificação na máquina da pessoa: abrir o projeto no VS Code, rodar um teste pela interface; no Claude Code, rodar `/fechar-tarefa` uma vez de ensaio e conferir a entrada gerada. O gancho nunca foi executado: se falhar, registrar no `ERROS.md` do kit e corrigir antes de seguir.
