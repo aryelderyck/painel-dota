@@ -1,0 +1,24 @@
+# Mapa de arquivos
+
+Uma linha por arquivo do repositório: para que serve, por que está aqui e o que mais poderia ter sido feito.
+Regra: todo arquivo é explicado **antes** de ser criado, e esta tabela muda no mesmo commit que cria, move ou apaga
+um arquivo. Arquivo que não se consegue justificar não é criado. Para conferir se falta alguém: `git ls-files`.
+
+| Arquivo | Para que serve | Por que está aqui | Alternativas | Tarefa em que foi criado |
+| --- | --- | --- | --- | --- |
+| `LICENSE` | Diz o que outras pessoas podem fazer com o código (licença MIT: usar, copiar e modificar, mantendo o aviso) | Raiz, com esse nome, porque o GitHub reconhece e mostra a licença; o kit exige MIT salvo motivo contrário | Apache-2.0 (mais longa, trata de patentes, nada que o projeto precise); sem licença (ninguém poderia reutilizar o código legalmente, ruim para portfólio) | Criação do repositório, antes do plano 1 |
+| `README.md` | Porta de entrada: o que é o projeto, para quem, como rodar, decisões e limitações | Raiz, porque o GitHub mostra esse arquivo na página do repositório | Wiki do GitHub (fica fora do git e não acompanha o código); README em inglês primeiro (o projeto começa em pt-BR; inglês entra na versão 1.1) | Criação do repositório, antes do plano 1 |
+| `docs/superpowers/specs/2026-11-10-painel-dota-design.md` | Especificação: o que o painel faz e por quê, com as decisões aprovadas | Pasta padrão das skills *superpowers*; a data no nome ordena as versões | Issue no GitHub (a discussão se perde e não é versionada junto com o código); dentro do README (misturaria decisão com instrução de uso) | Especificação, antes do plano 1 |
+| `docs/superpowers/plans/2026-11-10-painel-dota-fundacao.md` | Plano 1: tarefas e passos para as etapas 0 e 1, marcados conforme são feitos | Mesma pasta padrão das skills, separada das especificações | GitHub Projects (quadro fora do git, sem histórico junto do código); lista de tarefas no README (cresceria sem limite) | Plano 1, antes da tarefa 1 |
+| `docs/api-fontes.md` | Evidência da Etapa 0: o que cada fonte de dados entrega, com a chamada que prova, e o plano B da lista de versões | `docs/` porque é documentação do projeto, não do processo das skills; nome diz o conteúdo | Dentro da especificação (ficaria enorme; a especificação guarda só a decisão e aponta para cá); planilha (fora do git, sem histórico) | Tarefa 1 |
+| `docs/MAPA-DE-ARQUIVOS.md` | Este mapa: o porquê de cada arquivo, para estudo e para as perguntas do `/fechar-tarefa` | `docs/` porque é documentação; nome em português, descritivo, em maiúsculas como os demais documentos-guia | Seção no README (deixaria a porta de entrada longa); comentário no topo de cada arquivo (não cabe em JSON nem na licença, e não dá visão de conjunto); lista gerada por `git ls-files` (dá os nomes, não o porquê) | Tarefa 1 |
+
+## Fora do repositório (de propósito)
+
+Arquivos que existem na máquina durante o trabalho, mas **não** entram no git:
+
+| Caminho | O que é | Por que fica fora |
+| --- | --- | --- |
+| `.superpowers/sdd/` | Registro de progresso do plano usado pelo Claude Code | Rascunho de trabalho; tem um `.gitignore` próprio que ignora tudo dentro dela |
+| `.playwright-mcp/` | Capturas do navegador automático | Saída temporária de ferramenta; entra no `.gitignore` na tarefa 2 |
+| Scripts da Etapa 0 (pasta temporária da sessão) | `campos-jogador.ps1` e `stratz-esquema.ps1`, usados uma vez para verificar as fontes | Investigação de uso único; o que eles provaram está em `docs/api-fontes.md` |
