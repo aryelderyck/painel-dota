@@ -193,6 +193,20 @@ e os **textos do jogo** (descrição de habilidades e de itens), como fazem os s
 - A lista de origens permitidas no CSP (seção 7A) ganha o endereço das imagens.
 - Se os endereços mudarem ou saírem do ar, a reserva genérica entra e o layout não quebra.
 
+**Achados de 2026-11-11 (lidos por ferramenta de leitura de página, não por script; a Etapa 0 confirma com script):**
+- OpenDota (`/api/constants/heroes`, `/items`, `/abilities`): trazem `img` e `icon` como caminho relativo
+  (`/apps/dota2/images/dota_react/heroes/antimage.png?`); o servidor das imagens não vem no JSON e precisa ser confirmado.
+  Os textos de itens e habilidades estão **só em inglês**.
+- Arquivo de dados da Valve, com o parâmetro de idioma `brazilian`: `herolist` e `itemlist` trazem `name_loc` em português
+  (ex.: "Adaga de Translocação"); `herodata?hero_id=` traz, por habilidade, `name_loc`, `desc_loc`, `lore_loc`, `notes_loc`
+  em português; `itemdata?item_id=` traz os mesmos campos para itens. Não achei campo de imagem nele.
+- Consequência provável: textos em português da Valve, imagens pelo caminho da OpenDota. `herodata` e `itemdata` são uma
+  chamada por herói e por item, então entram no coletor diário com cache, nunca no caminho do visitante. É endereço sem
+  documentação (mesmo plano B da lista de versões).
+- Os textos vêm com marcação (`<b>`, `<font color=...>`, `<h1>`) e variáveis como `%blink_range%`. **Nunca inserir o texto
+  cru na página**: converter para um conjunto pequeno de elementos permitidos (lista fixa) e preencher as variáveis com
+  `special_values`; teste com texto malicioso de exemplo (seção 8).
+
 ## 7A. Preparação para anúncios (decisão de 2026-11-10)
 
 A versão 1 vai ao ar **sem anúncios**, mas o site é desenhado para recebê-los depois sem refazer o layout:
