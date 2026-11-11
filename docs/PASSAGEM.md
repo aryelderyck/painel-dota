@@ -13,8 +13,8 @@ para o outro computador. Atualize-o a cada passagem; apague-o quando o plano 1 t
 3. **Antes do primeiro commit, nos dois repositórios**, configure a identidade só neles (ela fica em `.git/config` e não
    vem com o clone; E-035 do kit): `git config --local user.name` e `git config --local user.email` com o mesmo nome e o
    mesmo e-mail `noreply` do GitHub que aparecem em `git log -1 --format='%an <%ae>'`. Confira com `git config user.email`.
-4. No Claude Code, aberto na pasta `painel-dota`: "Leia `docs/PASSAGEM.md` e continue a tarefa 1 do plano 1, com as
-   mesmas regras de trabalho: uma tarefa por vez, explicar antes, TDD, nada sem verificar, erros no `ERROS.md` do kit."
+4. Abra o Claude Code na pasta `painel-dota`. O `CLAUDE.md` da raiz é carregado sozinho e traz o contexto e as regras.
+   Primeira mensagem: "Leia o `CLAUDE.md` e o `docs/PASSAGEM.md` e continue a tarefa 1 do plano 1."
 
 ## O que está feito
 
@@ -44,6 +44,10 @@ da sessão foram refeitos com ela antes do primeiro envio (E-035 do kit).
 **Kit `padroes-de-qualidade`:** erros E-025 a E-035, regras 17 e 18, `.gitattributes`, `docs/MAPA-DE-ARQUIVOS.md` e a
 regra nova em `PRATICAS.md` como "Em teste (painel)".
 
+**Atualização de 2026-11-11:** direção visual escolhida (mistura A+B) e decisão da pessoa de usar imagens e textos oficiais do
+jogo; achados provisórios (lidos por página, não por script) na seção 7 da especificação. O `CLAUDE.md` foi criado antes da
+tarefa 2; a tarefa 2 deve só completar os campos de comandos nele, não recriá-lo.
+
 ## O que falta na tarefa 1
 
 1. Rodar o script do jogador e colar a saída na conversa: o Claude Code preenche a linha da função 4 do `api-fontes.md`
@@ -54,6 +58,13 @@ regra nova em `PRATICAS.md` como "Em teste (painel)".
 3. Passo 4: escrever na seção 4 da especificação a decisão de fonte e as correções (3.000 por dia confirmado, chave paga,
    termos do STRATZ, versões com letra pela Valve).
 4. Passo 5: `git grep --untracked -nE "[0-9]{8,}" docs/api-fontes.md`, depois do ensaio com um número fictício.
+5b. (antes do passo 6) **Imagens e textos do jogo:** confirmar **com script** o que a especificação (seção 7) registra
+   como provisório, para um herói (id 1), um item (`item_blink`) e uma habilidade: (a) campos `img` e `icon` da OpenDota e o
+   servidor completo das imagens (responde 200 sem login? largura, altura e formato); (b) arquivo de dados da Valve com
+   `language=brazilian`: `herolist`, `itemlist`, `herodata?hero_id=1`, `itemdata?item_id=1`, se `name_loc`, `desc_loc`,
+   `lore_loc` e `notes_loc` vêm em português e se há campo de imagem; (c) a marcação nos textos (`<b>`, `<font color>`,
+   `<h1>`) e variáveis como `%blink_range%`; (d) quantas chamadas a coleta completa exigiria. Registrar em `api-fontes.md` só
+   nomes de campos, formatos e contagens, **sem copiar imagem nem texto do jogo**.
 5. Passo 6: commit `docs: registra a verificação das fontes de dados e a decisão`. Responder às perguntas de inglês.
    Atualizar esta passagem.
 
