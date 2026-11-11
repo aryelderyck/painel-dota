@@ -181,13 +181,17 @@ opções. Os gráficos são desenhados por nós, sem biblioteca de terceiros car
 herói, build em linha do tempo, diagnóstico em barras contra a média), com tema escuro, azul de mana como cor de ação, verde e
 vermelho para subir e cair e dourado para itens. A maquete de referência está no canvas "Painel Dota: direções visuais".
 
-**Retratos dos heróis:** a pessoa decidiu usar as imagens oficiais dos heróis, como fazem os sites da comunidade. Regras: as
-imagens são **carregadas em tempo de execução do endereço que a própria fonte de dados informa** e **não entram no
-repositório**; todas as maquetes e testes continuam com retratos fictícios; o endereço e o formato exatos (retrato vertical
-ou horizontal) são confirmados na Etapa 0 com dados reais; a imagem tem tamanho fixo reservado (sem deslocamento de layout),
-`alt` com o nome do herói e um retrato genérico de reserva se o carregamento falhar. Se a política da Valve para o uso mudar,
-trocamos por retratos próprios sem mexer no layout. Como isso é recurso de terceiros, a lista de origens permitidas no CSP
-(seção 7A) ganha o endereço das imagens.
+**Arte e textos do jogo (decisão da pessoa, 2026-11-11):** o site usa as **imagens oficiais** de heróis, itens e habilidades,
+e os **textos do jogo** (descrição de habilidades e de itens), como fazem os sites da comunidade. Regras:
+- As imagens e os textos são **carregados em tempo de execução, do endereço que a fonte de dados informa**, e **não entram no
+  repositório**; maquetes, testes e exemplos continuam com arte e texto fictícios.
+- A Etapa 0 confirma com dados reais: endereço e formato das imagens (retrato vertical ou horizontal, ícone de item e de
+  habilidade) e de onde vêm as descrições (lista de itens e de habilidades da OpenDota ou arquivo de dados do jogo), inclusive
+  **em quais idiomas** elas existem. Texto do jogo que só exista em inglês aparece em inglês até haver fonte em português.
+- Toda imagem tem tamanho fixo reservado (sem deslocamento de layout), `alt` com o nome e uma imagem genérica de reserva se o
+  carregamento falhar.
+- A lista de origens permitidas no CSP (seção 7A) ganha o endereço das imagens.
+- Se os endereços mudarem ou saírem do ar, a reserva genérica entra e o layout não quebra.
 
 ## 7A. Preparação para anúncios (decisão de 2026-11-10)
 
@@ -264,7 +268,7 @@ A versão 1 vai ao ar **sem anúncios**, mas o site é desenhado para recebê-lo
 | Poucos jogadores com dados públicos ativados | Mensagem clara; páginas de heróis e meta continuam úteis sem jogador |
 | Tradução ruim prejudicar a busca | Idioma só entra com tradução revisada |
 | Muitas páginas (heróis x idiomas x versões) parecerem conteúdo repetido | Sitemap só com versão atual e anterior; amostra mínima por página; explicações próprias em cada uma |
-| Imagens oficiais dos heróis mudarem de endereço, sair do ar ou terem o uso restringido | Carregar pelo endereço informado pela fonte, retrato genérico de reserva, tamanho fixo e possibilidade de trocar por retratos próprios (seção 7) |
+| Imagens e textos do jogo mudarem de endereço, sair do ar ou não existirem em algum idioma | Carregar pelo endereço informado pela fonte, imagem genérica de reserva, tamanho fixo e texto em inglês como reserva (seção 7) |
 
 ## 14. Desvios dos padrões do kit
 
