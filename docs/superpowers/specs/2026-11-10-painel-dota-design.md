@@ -177,6 +177,36 @@ nenhum dos sites de referência. A direção (paleta, tipografia, componentes de
 mínimo de 4,5:1) é definida com **maquetes** no início da etapa do site, antes de qualquer página; a pessoa escolhe entre
 opções. Os gráficos são desenhados por nós, sem biblioteca de terceiros carregada de fora.
 
+**Direção escolhida (2026-11-11):** mistura das opções A (cabeçalho, cores de vitória e derrota, destaques) e B (cartão por
+herói, build em linha do tempo, diagnóstico em barras contra a média), com tema escuro, azul de mana como cor de ação, verde e
+vermelho para subir e cair e dourado para itens. A maquete de referência está no canvas "Painel Dota: direções visuais".
+
+**Arte e textos do jogo (decisão da pessoa, 2026-11-11):** o site usa as **imagens oficiais** de heróis, itens e habilidades,
+e os **textos do jogo** (descrição de habilidades e de itens), como fazem os sites da comunidade. Regras:
+- As imagens e os textos são **carregados em tempo de execução, do endereço que a fonte de dados informa**, e **não entram no
+  repositório**; maquetes, testes e exemplos continuam com arte e texto fictícios.
+- A Etapa 0 confirma com dados reais: endereço e formato das imagens (retrato vertical ou horizontal, ícone de item e de
+  habilidade) e de onde vêm as descrições (lista de itens e de habilidades da OpenDota ou arquivo de dados do jogo), inclusive
+  **em quais idiomas** elas existem. Texto do jogo que só exista em inglês aparece em inglês até haver fonte em português.
+- Toda imagem tem tamanho fixo reservado (sem deslocamento de layout), `alt` com o nome e uma imagem genérica de reserva se o
+  carregamento falhar.
+- A lista de origens permitidas no CSP (seção 7A) ganha o endereço das imagens.
+- Se os endereços mudarem ou saírem do ar, a reserva genérica entra e o layout não quebra.
+
+**Achados de 2026-11-11 (lidos por ferramenta de leitura de página, não por script; a Etapa 0 confirma com script):**
+- OpenDota (`/api/constants/heroes`, `/items`, `/abilities`): trazem `img` e `icon` como caminho relativo
+  (`/apps/dota2/images/dota_react/heroes/antimage.png?`); o servidor das imagens não vem no JSON e precisa ser confirmado.
+  Os textos de itens e habilidades estão **só em inglês**.
+- Arquivo de dados da Valve, com o parâmetro de idioma `brazilian`: `herolist` e `itemlist` trazem `name_loc` em português
+  (ex.: "Adaga de Translocação"); `herodata?hero_id=` traz, por habilidade, `name_loc`, `desc_loc`, `lore_loc`, `notes_loc`
+  em português; `itemdata?item_id=` traz os mesmos campos para itens. Não achei campo de imagem nele.
+- Consequência provável: textos em português da Valve, imagens pelo caminho da OpenDota. `herodata` e `itemdata` são uma
+  chamada por herói e por item, então entram no coletor diário com cache, nunca no caminho do visitante. É endereço sem
+  documentação (mesmo plano B da lista de versões).
+- Os textos vêm com marcação (`<b>`, `<font color=...>`, `<h1>`) e variáveis como `%blink_range%`. **Nunca inserir o texto
+  cru na página**: converter para um conjunto pequeno de elementos permitidos (lista fixa) e preencher as variáveis com
+  `special_values`; teste com texto malicioso de exemplo (seção 8).
+
 ## 7A. Preparação para anúncios (decisão de 2026-11-10)
 
 A versão 1 vai ao ar **sem anúncios**, mas o site é desenhado para recebê-los depois sem refazer o layout:
@@ -252,6 +282,7 @@ A versão 1 vai ao ar **sem anúncios**, mas o site é desenhado para recebê-lo
 | Poucos jogadores com dados públicos ativados | Mensagem clara; páginas de heróis e meta continuam úteis sem jogador |
 | Tradução ruim prejudicar a busca | Idioma só entra com tradução revisada |
 | Muitas páginas (heróis x idiomas x versões) parecerem conteúdo repetido | Sitemap só com versão atual e anterior; amostra mínima por página; explicações próprias em cada uma |
+| Imagens e textos do jogo mudarem de endereço, sair do ar ou não existirem em algum idioma | Carregar pelo endereço informado pela fonte, imagem genérica de reserva, tamanho fixo e texto em inglês como reserva (seção 7) |
 
 ## 14. Desvios dos padrões do kit
 
