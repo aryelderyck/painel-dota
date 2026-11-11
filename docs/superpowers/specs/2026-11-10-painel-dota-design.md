@@ -177,6 +177,18 @@ nenhum dos sites de referência. A direção (paleta, tipografia, componentes de
 mínimo de 4,5:1) é definida com **maquetes** no início da etapa do site, antes de qualquer página; a pessoa escolhe entre
 opções. Os gráficos são desenhados por nós, sem biblioteca de terceiros carregada de fora.
 
+**Direção escolhida (2026-11-11):** mistura das opções A (cabeçalho, cores de vitória e derrota, destaques) e B (cartão por
+herói, build em linha do tempo, diagnóstico em barras contra a média), com tema escuro, azul de mana como cor de ação, verde e
+vermelho para subir e cair e dourado para itens. A maquete de referência está no canvas "Painel Dota: direções visuais".
+
+**Retratos dos heróis:** a pessoa decidiu usar as imagens oficiais dos heróis, como fazem os sites da comunidade. Regras: as
+imagens são **carregadas em tempo de execução do endereço que a própria fonte de dados informa** e **não entram no
+repositório**; todas as maquetes e testes continuam com retratos fictícios; o endereço e o formato exatos (retrato vertical
+ou horizontal) são confirmados na Etapa 0 com dados reais; a imagem tem tamanho fixo reservado (sem deslocamento de layout),
+`alt` com o nome do herói e um retrato genérico de reserva se o carregamento falhar. Se a política da Valve para o uso mudar,
+trocamos por retratos próprios sem mexer no layout. Como isso é recurso de terceiros, a lista de origens permitidas no CSP
+(seção 7A) ganha o endereço das imagens.
+
 ## 7A. Preparação para anúncios (decisão de 2026-11-10)
 
 A versão 1 vai ao ar **sem anúncios**, mas o site é desenhado para recebê-los depois sem refazer o layout:
@@ -252,6 +264,7 @@ A versão 1 vai ao ar **sem anúncios**, mas o site é desenhado para recebê-lo
 | Poucos jogadores com dados públicos ativados | Mensagem clara; páginas de heróis e meta continuam úteis sem jogador |
 | Tradução ruim prejudicar a busca | Idioma só entra com tradução revisada |
 | Muitas páginas (heróis x idiomas x versões) parecerem conteúdo repetido | Sitemap só com versão atual e anterior; amostra mínima por página; explicações próprias em cada uma |
+| Imagens oficiais dos heróis mudarem de endereço, sair do ar ou terem o uso restringido | Carregar pelo endereço informado pela fonte, retrato genérico de reserva, tamanho fixo e possibilidade de trocar por retratos próprios (seção 7) |
 
 ## 14. Desvios dos padrões do kit
 
